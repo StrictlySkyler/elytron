@@ -1,0 +1,49 @@
+{
+  "name": "cockroach",
+  "version": "1.0.0",
+  "description": "An interface for Kafka in Node and Meteor",
+  "main": "source/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha --compilers js:babel-core/register",
+    "watch": "mocha -w --compilers js:babel-core/register"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StrictlySkyler/cockroach.git"
+  },
+  "keywords": [
+    "kafka",
+    "broker",
+    "librdkafka",
+    "node-rdkafka",
+    "pubsub",
+    "pub-sub",
+    "message",
+    "messages",
+    "queue",
+    "queues",
+    "topics",
+    "produce",
+    "consume",
+    "producer",
+    "consumer"
+  ],
+  "author": "Skyler Brungardt <skyler.brungardt@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/StrictlySkyler/cockroach/issues"
+  },
+  "homepage": "https://github.com/StrictlySkyler/cockroach#readme",
+  "devDependencies": {
+    "babel-core": "^6.21.0",
+    "babel-preset-es2015": "^6.18.0"
+  },
+  "dependencies": {
+    "debug": "^2.5.1",
+    "node-rdkafka": "^0.6.2",
+    "uuid": "^3.0.1"
+  }
+}
