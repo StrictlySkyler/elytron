@@ -1,4 +1,4 @@
-import debug from 'debug';
+import { log, error } from '../lib/logger';
 import {
   set_producer_retry_ms,
   set_client,
@@ -6,9 +6,6 @@ import {
   produce,
   register_topics
 } from './producer/methods';
-
-let log = debug('cockroach:log');
-let error = debug('cockroach:error');
 
 let producer;
 

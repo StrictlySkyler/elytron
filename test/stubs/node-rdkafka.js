@@ -1,24 +1,45 @@
 /* eslint no-unused-vars: 0 */
 
 let producer_handlers = {};
+let consumer_handlers = {};
 let connected = false;
 let producer_settings;
-let topic_settings;
+let consumer_settings;
+let producer_topic_settings;
+let consumer_topic_settings;
 let produced_messages = [];
+let consumed_topics = [];
 
-class Producer {
+class Client {
+  on (event, callback) {
+    this.type == 'producer' ?
+      producer_handlers[event] = callback :
+      consumer_handlers[event] = callback
+    ;
+
+    return this;
+  }
+
+  off (event, callback) {
+    this.type == 'producer' ?
+      delete producer_handlers[event] :
+      delete consumer_handlers[event]
+    ;
+  }
+
+  connect () {
+    connected = true;
+  }
+}
+
+class Producer extends Client {
   constructor (ProducerSettings, TopicSettings) {
+    super();
+
     producer_settings = ProducerSettings;
-    topic_settings = TopicSettings;
+    producer_topic_settings = TopicSettings;
 
-    this.on = function (event, callback) {
-      producer_handlers[event] = callback;
-      return this;
-    };
-
-    this.connect = function () {
-      connected = true;
-    };
+    this.type = 'producer';
 
     return this;
   }
@@ -41,21 +62,57 @@ class Producer {
   poll () { return false; }
 }
 
+class KafkaConsumer extends Client {
+  constructor (ConsumerSettings, TopicSettings) {
+    super();
+
+    consumer_settings = ConsumerSettings;
+    consumer_topic_settings = TopicSettings;
+
+    return this;
+  }
+
+  consume (topics) {
+    return consumed_topics.concat(topics);
+  }
+
+  unsubscribe () {
+    consumed_topics = [];
+  }
+}
+
 let Kafka = {
   Producer: Producer,
+
+  KafkaConsumer: KafkaConsumer,
 
   is_connected: function () { return connected; },
 
   get_producer_handlers: function () { return producer_handlers; },
 
+  get_consumer_handlers: function () { return consumer_handlers; },
+
   get_produced_messages: function () { return produced_messages; },
 
   reset: function () {
     producer_handlers = {};
-    producer_settings = topic_settings = null;
+    consumer_handlers = {};
+    producer_settings =
+      producer_topic_settings =
+      consumer_settings =
+      consumer_topic_settings =
+      null
+    ;
     connected = false;
     produced_messages = [];
+    consumed_topics = [];
+  },
+
+  ready: function () {
+    if (producer_handlers.ready) { producer_handlers.ready(); }
+    if (consumer_handlers.ready) { consumer_handlers.ready(); }
   }
+
 };
 
 export default Kafka;

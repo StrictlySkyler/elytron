@@ -1,46 +1,30 @@
-import Kafka from 'node-rdkafka';
+import { log, error } from '../lib/logger';
+import {
+  check_handlers,
+  handle_message,
+  get_consumed_topics,
+  get_active_topics,
+  set_active_topics,
+  reset_handlers,
+  get_topic_handlers
+} from './consumer/methods';
 
 let consumer;
 let TOPICS;
-let active_topics = [];
-let handlers = {};
-let produce;
 
-let check_handlers = function (data, parsed_message) {
-
-  console.log('Checking handlers for:', data.topic);
-  if (! parsed_message.value.registration && handlers[data.topic]) {
-    return true;
-  }
-
-  return false;
-};
-
-let send_results = function (topic, results) {
-  console.log('Sending results back to awaiting topic:', topic);
-
-  let results_string = JSON.stringify(results);
-  produce(parsed_message.awaiting_topic, results_string);
-};
-
-let handle_message = function (topic, message) {
-  console.log('Calling handler for:', topic);
-  return handlers[topic](message);
-};
-
-export default class Consumer {
-  constructor (consumer_settings, topic_settings, topics, Produce) {
+class Consumer {
+  constructor (consumer_settings, topic_settings, topics, Kafka) {
+    if (! Kafka) { throw new TypeError('Invalid Arguments!'); }
 
     consumer = new Kafka.KafkaConsumer(
       consumer_settings, topic_settings
     );
 
     TOPICS = topics;
-    produce = Produce;
 
     consumer
       .on('ready', () => {
-        console.log('Consumer ready.');
+        log('Consumer ready.');
         this.consume(TOPICS);
       })
 
@@ -48,24 +32,27 @@ export default class Consumer {
 
         let results;
         let parsed_message = JSON.parse(data.value.toString());
-        console.log(
+        log(
           'Consuming message from topic:',
           data.topic,
           '\n with data:\n',
           parsed_message
         );
+        let handles = check_handlers(data, parsed_message);
 
-        if (check_handlers(data, parsed_message)) {
-          results = handle_message(data.topic, parsed_message);
+        if (handles.length) {
+          results = handle_message(handles, parsed_message);
         }
+
+        return results;
 
       })
 
       .on('error', function (err) {
-        console.error('Consumer error:\n', err);
+        error('Consumer error:\n', err);
       })
       .on('event.log', function () {
-        console.log('Event log:\n', arguments);
+        log('Event log:\n', arguments);
       })
     ;
 
@@ -76,38 +63,87 @@ export default class Consumer {
   }
 
   consume (topics) {
-    active_topics = active_topics.concat(topics);
+    if (topics && ! (topics instanceof Array)) {
+      throw new TypeError(
+        'Topics passed to this method must be an array of strings.'
+      );
+    }
 
-    if (active_topics.length) {
-      console.log('Consuming topics:\n', active_topics);
-      consumer.consume(active_topics);
+    set_active_topics(get_active_topics().concat(topics));
+
+    if (get_active_topics().length) {
+      log('Consuming topics:\n', get_active_topics());
+      consumer.consume(get_active_topics());
     }
 
     return this;
   }
 
-  unsubscribe () {
+  starve (fully) {
     consumer.unsubscribe();
+    set_active_topics([]);
 
-    handlers = {};
+    if (fully) reset_handlers();
 
     return this;
   }
 
   on (event, callback) {
+    if (
+      ! event ||
+      ! callback ||
+      ! event instanceof String ||
+      ! callback instanceof Function
+    ) { throw new TypeError('Invalid Arguments!'); }
+
     consumer.on(event, callback);
 
     return this;
   }
 
+  off (event, callback) {
+    consumer.off(event, callback);
+
+    return this;
+  }
+
+  topic (topic, callback) {
+    if (
+      ! topic ||
+      ! callback ||
+      ! topic instanceof String ||
+      ! callback instanceof Function
+    ) { throw new TypeError('Invalid Arguments!'); }
+    log('Topic callback received, assigning handler and consuming new topic.');
+    get_topic_handlers()[topic] = callback;
+
+    return this.consume([topic]);
+  }
+
   topics (topic_hash) {
-    console.log('Topic hash received, assigning handlers.');
+    if (
+      (topic_hash && ! topic_hash instanceof Object) ||
+      topic_hash instanceof Function ||
+      topic_hash instanceof Array
+    ) {
+      throw new TypeError('Invalid Arguments!');
+    }
+    if (! topic_hash) { return get_consumed_topics(); }
+
+    log('Topic hash received, assigning handlers and consuming new topics.');
     let topic_list = [];
-    _.each(topic_hash, function (value, key) {
-      handlers[key] = value;
-      topic_list.push(key);
+    Object.keys(topic_hash).forEach(function (topic) {
+      get_topic_handlers()[topic] = topic_hash[topic];
+      topic_list.push(topic);
     });
 
-    this.consume(topic_list);
+    return this.consume(topic_list);
   }
 }
+
+export {
+  Consumer,
+  check_handlers,
+  handle_message,
+  get_consumed_topics
+};

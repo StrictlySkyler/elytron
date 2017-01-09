@@ -1,8 +1,8 @@
 /* eslint no-new: 0 */
 
 import assert from 'assert';
-import Producer from '../source/producer';
-import Kafka from './stubs/node-rdkafka';
+import Producer from '../../source/producer';
+import Kafka from '../stubs/node-rdkafka';
 import {
   set_received,
   produce_once,
@@ -10,14 +10,14 @@ import {
   acknowledge_delivery_report,
   produce_at_least_once,
   produce
-} from '../source/producer/methods';
-
-afterEach(function () {
-  Kafka.reset();
-  set_received({});
-});
+} from '../../source/producer/methods';
 
 describe('Producer', function () {
+  afterEach(function () {
+    Kafka.reset();
+    set_received({});
+  });
+
   it('should exist on import', function () {
     assert(Producer);
   });
@@ -327,10 +327,3 @@ describe('Producer', function () {
   );
 });
 
-describe('Consumer', function () {
-  it('should exist on import');
-});
-
-describe('Decorator', function () {
-  it('should be pending');
-});

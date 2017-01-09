@@ -1,3 +1,4 @@
+import { log } from '../lib/logger';
 import config from './config';
 import { decorate, produce } from './methods';
 import Consumer from './consumer';
@@ -16,7 +17,7 @@ producer_settings['message.send.max.retries'] =
 consumer_settings['fetch.error.backoff.ms'] =
   config.consumer_settings['fetch.error.backoff.ms'];
 
-console.log(
+log(
   'Connecting to broker hosts:',
   config.general_settings['metadata.broker.list']
 );
@@ -26,10 +27,10 @@ let _produce = new Producer(
   config, producer_settings, producer_topic_settings, TOPICS, Kafka
 );
 let consumer = new Consumer(
-  consumer_settings, consumer_topic_settings, TOPICS, _produce, Kafka
+  consumer_settings, consumer_topic_settings, TOPICS, Kafka
 );
 
-decorate(config, _produce, consumer);
+decorate(_produce);
 
 export { produce, consumer };
 
