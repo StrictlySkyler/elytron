@@ -110,7 +110,7 @@ consumer.topics({
 });
 ```
 
-#### `*`
+#### `*` (wildcard)
 Cockroach also supports a "wildcard topic", which will execute the function assigned to it any time *any* message is consumed from *any* topic:
 ```javascript
 consumer.topics({
