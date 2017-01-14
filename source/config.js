@@ -4,7 +4,7 @@ import uuid from 'uuid';
 let uuid_suffix = process.env.BROKER_LOG == 'full' ? '_' + uuid.v4() : '';
 let env = process.env;
 const config = {
-  topics: process.env.TOPICS || [],
+  topics: process.env.TOPICS ? JSON.parse(process.env.TOPICS) : [],
   producer_retry_ms: process.env.PRODUCER_RETRY_MS || 1000,
   long_running_topic_wait_ms: process.env.LONG_RUNNING_TOPIC_WAIT_MS || 20000,
   general_settings: {
@@ -13,7 +13,7 @@ const config = {
     'metadata.broker.list': env.BROKER_LIST || 'localhost:9092',
     'socket.timeout.ms': env.SOCKET_TIMEOUT_MS || 1000,
     'coordinator.query.interval.ms': env.COORDINATOR_QUERY_INTERVAL_MS || 1000,
-     // Smaller than this tends to not work         vvv
+    // Smaller than this tends to not work          vvvvv
     'session.timeout.ms': env.SESSION_TIMEOUT_MS || 10000,
     'metadata.request.timeout.ms': env.METADATA_REQUEST_TIMEOUT_MS || 1000,
     'topic.metadata.refresh.interval.ms':

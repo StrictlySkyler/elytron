@@ -1,7 +1,7 @@
 import { log } from '../lib/logger';
 import config from './config';
-import { decorate, produce } from './methods';
-import Consumer from './consumer';
+import { decorate, produce, get_producer_client } from './methods';
+import { Consumer } from './consumer';
 import Producer from './producer';
 import Kafka from 'node-rdkafka';
 
@@ -32,5 +32,5 @@ let consumer = new Consumer(
 
 decorate(_produce);
 
-export { produce, consumer };
+export { produce, consumer, get_producer_client };
 

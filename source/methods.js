@@ -1,7 +1,9 @@
 import BrokerError from './error';
 import { log } from '../lib/logger';
+import { get_client } from './producer/methods';
 
 let _produce;
+let get_producer_client = get_client;
 
 let decorate = function (Produce) { return _produce = Produce; };
 
@@ -44,5 +46,5 @@ let produce = function (args) {
 
 };
 
-export { decorate, produce, validate_arguments };
+export { decorate, produce, validate_arguments, get_producer_client };
 
