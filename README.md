@@ -27,8 +27,10 @@ Cockroach's API exposes two things for developer use: the `produce` function and
 
 ```javascript
 import { produce, consumer } from 'cockroach';
+```
 
-// Alternatively, without ES6:
+Alternately, without ES6:
+```javascript
 var roach = require('cockroach');
 var produce = roach.produce;
 var consumer = roach.consumer;
@@ -74,7 +76,8 @@ console.log(status);
 //}
 ```
 
-The `produce` function will retry producing to Kafka until it succeeds or fails to reach Kafka, at which point it will throw an error.
+The `produce` function will retry producing to Kafka until it succeeds; if it fails to reach Kafka and cannot recover (such as due to a network outage), it will throw an error.
+
 #### The Producer Object
 Generally speaking, the `produce` method should cover all the needs for producing messages.  However, should you need to access the underlying client, such as to assign event listeners, cockroach exposes the underlying node-rdkafka client for producers.
 
@@ -87,7 +90,7 @@ let producer_client = get_producer_client();
 producer_client.on(...);
 ```
 
-The producer client merely exposes the underlying node-rdkafka API; see (node-rdkafka)[https://blizzard.github.io/node-rdkafka/current/Producer.html] for details.
+The producer client merely exposes the underlying node-rdkafka API; see [node-rdkafka](https://blizzard.github.io/node-rdkafka/current/Producer.html) for details.
 
 ### Consumer
 There are multiple ways to consume topics with the `consumer` object.
@@ -140,7 +143,7 @@ consumer.starve(true); // All topics and handlers will be removed.
 Both the `on` and `off` methods are exposed from the underlying client and can register event listeners normally, just as node-rdkafka (and EventEmitter, in turn) themselves do.  See their documentation for details on how to use these methods.
 
 ## Options & Defaults
-Each of Cockroach's settings can be overridden by setting an environment variable with the desired value.  The names of these values, along with their default settings, can be found by viewing Cockroach's (config file)[https://github.com/StrictlySkyler/cockroach/blob/master/source/config.js].
+Each of Cockroach's settings can be overridden by setting an environment variable with the desired value.  The names of these values, along with their default settings, can be found by viewing Cockroach's [config file](https://github.com/StrictlySkyler/cockroach/blob/master/source/config.js).
 
 ## Tests
 
