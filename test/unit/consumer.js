@@ -208,7 +208,6 @@ describe('Consumer', function () {
       registration_data_packet,
       registration_data_packet.value
     ));
-    console.log(get_topic_handlers())
     assert(! check_handlers(unhandled_topic));
   });
 

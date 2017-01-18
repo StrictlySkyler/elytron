@@ -1,10 +1,11 @@
 import BrokerError from './error';
 import { log, error } from '../lib/logger';
 import uuid from 'uuid';
-import { set_timer, clear_timer } from './producer/methods';
+import { set_timer, clear_timer, get_client } from './producer/methods';
 
 let config;
 let _produce;
+let get_producer_client = get_client;
 let consumer;
 let LONG_RUNNING_TOPIC_WAIT_MS;
 
@@ -15,7 +16,7 @@ let decorate = function (Config, Produce, Consumer) {
   _produce = Produce;
   consumer = Consumer;
 
-};
+let decorate = function (Produce) { return _produce = Produce; };
 
 let validate_arguments = function (topic, message, work) {
 
@@ -119,5 +120,5 @@ let produce = function (args) {
 
 };
 
-export { decorate, produce, validate_arguments, await_response };
+export { decorate, produce, validate_arguments, await_response, get_producer_client };
 

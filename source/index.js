@@ -32,5 +32,5 @@ let consumer = new Consumer(
 
 decorate(_produce);
 
-export { produce, consumer };
+export { produce, consumer, get_producer_client };
 

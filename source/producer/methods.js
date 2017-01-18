@@ -17,6 +17,10 @@ let set_client = function (client) {
   return producer = client;
 };
 
+let get_client = function () {
+  return producer;
+};
+
 let set_received = function (hash) {
   received = hash;
 };
@@ -118,6 +122,8 @@ let produce_at_least_once = function (topic, message_package) {
 };
 
 let produce = function (topic, message) {
+  let timestamp = Date.now();
+
   if (! topic || typeof topic != 'string') {
     throw new BrokerError(
       'Invalid topic argument!\n' +
@@ -125,11 +131,11 @@ let produce = function (topic, message) {
       'and should be the name of a valid Kafka topic.'
     );
   }
-  if (! message) { message = { registration: Date.now() }; }
+  if (! message) { message = { registration: timestamp }; }
 
   let id = uuid.v4();
   let message_package = {
-    timestamp: Date.now(),
+    timestamp: timestamp,
     id: id,
     value: message
   };
@@ -176,5 +182,6 @@ export {
   register_topics,
   set_producer_retry_ms,
   set_client,
+  get_client,
   set_received
 };
