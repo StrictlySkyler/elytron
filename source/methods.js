@@ -15,8 +15,7 @@ let decorate = function (Config, Produce, Consumer) {
   LONG_RUNNING_TOPIC_WAIT_MS = config.long_running_topic_wait_ms;
   _produce = Produce;
   consumer = Consumer;
-
-let decorate = function (Produce) { return _produce = Produce; };
+};
 
 let validate_arguments = function (topic, message, work) {
 
@@ -120,5 +119,7 @@ let produce = function (args) {
 
 };
 
-export { decorate, produce, validate_arguments, await_response, get_producer_client };
+export {
+  decorate, produce, validate_arguments, await_response, get_producer_client
+};
 
