@@ -1,16 +1,16 @@
-# cockroach
-_n._ A interface for Kafka in NodeJS with sensible defaults.
+# elytron
+A interface for Kafka in NodeJS with sensible defaults.
 
 Compatible with Kafka 0.8.x.x and higher.
 
 Tested with Kafka 0.10.1.0.
 
-Cockroach relies on Node 4+, and is compatible with Meteor.
+Elytron relies on Node 4+, and is compatible with Meteor.
 
 ## Features
-Cockroach provides an interface for interacting with a Kafka cluster via NodeJS and Meteor in an idiomatic, straightforward manner.  It abstracts away many of the underlying interactions provided by node-rdkafka to provide a clean, simple interface, while still exposing the underlying nitty-gritty functionality if needed.
+Elytron provides an interface for interacting with a Kafka cluster via NodeJS and Meteor in an idiomatic, straightforward manner.  It abstracts away many of the underlying interactions provided by node-rdkafka to provide a clean, simple interface, while still exposing the underlying nitty-gritty functionality if needed.
 
-Specifically, Cockroach provides the following when interacting with Kafka:
+Specifically, elytron provides the following when interacting with Kafka:
 
 - Straightforward API
 - Automatic topic creation
@@ -21,17 +21,17 @@ Specifically, Cockroach provides the following when interacting with Kafka:
 
 ## Usage
 
-Cockroach can be installed by running `npm i --save cockroach` in the terminal.
+Elytron can be installed by running `npm i --save elytron` in the terminal.
 
-Cockroach's API exposes two things for developer use: the `produce` function and the `consumer` object.  They can be accessed like so:
+elytron's API exposes two things for developer use: the `produce` function and the `consumer` object.  They can be accessed like so:
 
 ```javascript
-import { produce, consumer } from 'cockroach';
+import { produce, consumer } from 'elytron';
 ```
 
 Alternately, without ES6:
 ```javascript
-var roach = require('cockroach');
+var roach = require('elytron');
 var produce = roach.produce;
 var consumer = roach.consumer;
 ```
@@ -43,9 +43,9 @@ At a basic level, a message can be produced and sent to Kafka on any given topic
 produce('an_interesting_topic');
 ```
 
-Every message produced by Cockroach includes a timestamp and a unique identifier with the original message.  If no message is provided, as in the example above, a "registration" message is created; its value is set to the timestamp of when it is called.
+Every message produced by elytron includes a timestamp and a unique identifier with the original message.  If no message is provided, as in the example above, a "registration" message is created; its value is set to the timestamp of when it is called.
 
-Usually a message is included when producing to a Kafka topic, even if Cockroach doesn't explicitly require one to be provided.  A message can be included like so:
+Usually a message is included when producing to a Kafka topic, even if elytron doesn't explicitly require one to be provided.  A message can be included like so:
 
 ```javascript
 produce('an_interesting_topic', a_relevant_message);
@@ -89,15 +89,15 @@ function some_work_to_do (message) {
 produce('an_interesting_topic', a_relevant_message, some_work_to_do);
 ```
 
-If a callback is provided, Cockroach will create a "private" topic using a UUID hash, automatically create a consumer for it, and include the name of the `awaiting_topic` in its initial message payload.  This allows for a consumer listening on the initial topic to provide a response message, which is in turn passed to the `some_work_to_do` callback.  In this way, Cockroach can be leveraged for a "request/response" model, passing everything through Kafka.
+If a callback is provided, elytron will create a "private" topic using a UUID hash, automatically create a consumer for it, and include the name of the `awaiting_topic` in its initial message payload.  This allows for a consumer listening on the initial topic to provide a response message, which is in turn passed to the `some_work_to_do` callback.  In this way, elytron can be leveraged for a "request/response" model, passing everything through Kafka.
 
 
 #### The Producer Object
-Generally speaking, the `produce` method should cover all the needs for producing messages.  However, should you need to access the underlying client, such as to assign event listeners, cockroach exposes the underlying node-rdkafka client for producers.
+Generally speaking, the `produce` method should cover all the needs for producing messages.  However, should you need to access the underlying client, such as to assign event listeners, elytron exposes the underlying node-rdkafka client for producers.
 
 It can be obtained like so:
 ```javascript
-import { get_producer_client } from 'cockroach';
+import { get_producer_client } from 'elytron';
 
 let producer_client = get_producer_client();
 
@@ -125,7 +125,7 @@ consumer.topics({
 ```
 
 #### `*` (wildcard)
-Cockroach also supports a "wildcard topic", which will execute the function assigned to it any time *any* message is consumed from *any* topic:
+Elytron also supports a "wildcard topic", which will execute the function assigned to it any time *any* message is consumed from *any* topic:
 ```javascript
 consumer.topics({
   '*': function () {},   // Executes for foo, bar, and any others
@@ -143,7 +143,7 @@ consumer.consume(['baz', 'qux']);
 Wildcard functions will execute for topics consumed in this way.  If no function is assigned to these topics, or as a wildcard, no work will be done, but the message will still be consumed.
 
 #### `.starve`
-Cockroach can stop consuming from topics via the `starve` method, like so:
+Elytron can stop consuming from topics via the `starve` method, like so:
 ```javascript
 consumer.starve();
 ```
@@ -157,8 +157,8 @@ consumer.starve(true); // All topics and handlers will be removed.
 Both the `on` and `off` methods are exposed from the underlying client and can register event listeners normally, just as node-rdkafka (and EventEmitter, in turn) themselves do.  See their documentation for details on how to use these methods.
 
 ## Options & Defaults
-Each of Cockroach's settings can be overridden by setting an environment variable with the desired value.  The names of these values, along with their default settings, can be found by viewing Cockroach's [config file](https://github.com/StrictlySkyler/cockroach/blob/master/source/config.js).
+Each of elytron's settings can be overridden by setting an environment variable with the desired value.  The names of these values, along with their default settings, can be found by viewing elytron's [config file](https://github.com/StrictlySkyler/elytron/blob/master/source/config.js).
 
 ## Tests
 
-To run tests for Cockroach, within the repo execute either `npm test` to run the suite, or `npm run watch` to execute the suite and watch for changes.
+To run tests for elytron, within the repo execute either `npm test` to run the suite, or `npm run watch` to execute the suite and watch for changes.

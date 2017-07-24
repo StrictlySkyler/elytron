@@ -2,8 +2,8 @@ import uuid from 'uuid';
 import BrokerError from '../error';
 import debug from 'debug';
 
-let log = debug('cockroach:log');
-let error = debug('cockroach:error');
+let log = debug('elytron:log');
+let error = debug('elytron:error');
 
 let PRODUCER_RETRY_MS;
 let producer;

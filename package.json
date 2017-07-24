@@ -1,6 +1,6 @@
 {
-  "name": "cockroach",
-  "version": "1.0.0",
+  "name": "elytron",
+  "version": "1.1.1",
   "description": "An interface for Kafka in Node and Meteor",
   "main": "./distribution/index.js",
   "directories": {
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/StrictlySkyler/cockroach.git"
+    "url": "git+https://github.com/StrictlySkyler/elytron.git"
   },
   "keywords": [
     "kafka",
@@ -36,9 +36,9 @@
   "author": "Skyler Brungardt <skyler.brungardt@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/StrictlySkyler/cockroach/issues"
+    "url": "https://github.com/StrictlySkyler/elytron/issues"
   },
-  "homepage": "https://github.com/StrictlySkyler/cockroach#readme",
+  "homepage": "https://github.com/StrictlySkyler/elytron#readme",
   "devDependencies": {
     "babel-core": "~6.21.0",
     "babel-preset-es2015": "~6.18.0"
