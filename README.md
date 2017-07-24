@@ -78,6 +78,20 @@ console.log(status);
 
 The `produce` function will retry producing to Kafka until it succeeds; if it fails to reach Kafka and cannot recover (such as due to a network outage), it will throw an error.
 
+#### Callbacks & Responses
+
+The `produce` method accepts an optional callback as a third argument:
+```javascript
+function some_work_to_do (message) {
+  // Work based on the response message happens here
+}
+
+produce('an_interesting_topic', a_relevant_message, some_work_to_do);
+```
+
+If a callback is provided, Cockroach will create a "private" topic using a UUID hash, automatically create a consumer for it, and include the name of the `awaiting_topic` in its initial message payload.  This allows for a consumer listening on the initial topic to provide a response message, which is in turn passed to the `some_work_to_do` callback.  In this way, Cockroach can be leveraged for a "request/response" model, passing everything through Kafka.
+
+
 #### The Producer Object
 Generally speaking, the `produce` method should cover all the needs for producing messages.  However, should you need to access the underlying client, such as to assign event listeners, cockroach exposes the underlying node-rdkafka client for producers.
 
