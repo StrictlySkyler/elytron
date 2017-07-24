@@ -23,7 +23,7 @@ Specifically, elytron provides the following when interacting with Kafka:
 
 Elytron can be installed by running `npm i --save elytron` in the terminal.
 
-elytron's API exposes two things for developer use: the `produce` function and the `consumer` object.  They can be accessed like so:
+Elytron's API exposes two things for developer use: the `produce` function and the `consumer` object.  They can be accessed like so:
 
 ```javascript
 import { produce, consumer } from 'elytron';
