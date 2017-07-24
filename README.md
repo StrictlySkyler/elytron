@@ -1,11 +1,11 @@
 # cockroach
-_n._ A interface for Kafka in NodeJS and Meteor with sensible defaults.
+_n._ A interface for Kafka in NodeJS with sensible defaults.
 
 Compatible with Kafka 0.8.x.x and higher.
 
 Tested with Kafka 0.10.1.0.
 
-Cockroach relies on Node 4+ and Meteor 1.4+.
+Cockroach relies on Node 4+, and is compatible with Meteor.
 
 ## Features
 Cockroach provides an interface for interacting with a Kafka cluster via NodeJS and Meteor in an idiomatic, straightforward manner.  It abstracts away many of the underlying interactions provided by node-rdkafka to provide a clean, simple interface, while still exposing the underlying nitty-gritty functionality if needed.
