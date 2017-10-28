@@ -1,4 +1,5 @@
 import { log } from '../../lib/logger';
+import EJSON from 'ejson';
 
 let active_topics = [];
 let handlers = {};
@@ -55,7 +56,7 @@ let get_topic_handlers = function () {
 let send_results = function (topic, results) {
   log('Sending results back to awaiting topic:', topic);
 
-  let results_string = JSON.stringify(results);
+  let results_string = EJSON.stringify(results);
   produce(parsed_message.awaiting_topic, results_string);
 };
 

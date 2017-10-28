@@ -1,6 +1,7 @@
 import uuid from 'uuid';
 import BrokerError from '../error';
 import debug from 'debug';
+import EJSON from 'ejson';
 
 let log = debug('elytron:log');
 let error = debug('elytron:error');
@@ -91,7 +92,7 @@ let produce_at_least_once = function (topic, message_package) {
     throw new TypeError('Invalid arguments!');
   }
 
-  let package_buffer = Buffer.from(JSON.stringify(message_package));
+  let package_buffer = Buffer.from(EJSON.stringify(message_package));
   let is_new;
 
   if (! received[topic]) {

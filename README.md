@@ -51,7 +51,7 @@ Usually a message is included when producing to a Kafka topic, even if elytron d
 produce('an_interesting_topic', a_relevant_message);
 ```
 
-The message provided must be a JSON-serializable object.
+The message provided must be a EJSON-serializable object.
 
 `produce` returns a hash containing the status of the produced message.  An example hash might look like:
 ```javascript

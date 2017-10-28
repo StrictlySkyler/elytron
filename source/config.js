@@ -1,10 +1,11 @@
 import os from 'os';
 import uuid from 'uuid';
+import EJSON from 'ejson';
 
 let uuid_suffix = process.env.BROKER_LOG == 'full' ? '_' + uuid.v4() : '';
 let env = process.env;
 const config = {
-  topics: process.env.TOPICS ? JSON.parse(process.env.TOPICS) : [],
+  topics: process.env.TOPICS ? EJSON.parse(process.env.TOPICS) : [],
   producer_retry_ms: process.env.PRODUCER_RETRY_MS || 1000,
   long_running_topic_wait_ms: process.env.LONG_RUNNING_TOPIC_WAIT_MS || 20000,
   general_settings: {

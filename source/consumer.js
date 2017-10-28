@@ -9,6 +9,7 @@ import {
   get_topic_handlers,
   send_results
 } from './consumer/methods';
+import EJSON from 'ejson';
 
 let consumer;
 let TOPICS;
@@ -32,7 +33,7 @@ class Consumer {
       .on('data', function (data) {
 
         let results;
-        let parsed_message = JSON.parse(data.value.toString());
+        let parsed_message = EJSON.parse(data.value.toString());
         log(
           'Consuming message from topic:',
           data.topic,
