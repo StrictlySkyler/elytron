@@ -11,6 +11,7 @@ import {
 import {
   get_topic_handlers
 } from '../../source/consumer/methods';
+import EJSON from 'ejson';
 
 describe('Consumer', function () {
   afterEach(function () {
@@ -94,7 +95,7 @@ describe('Consumer', function () {
       let handlers = Kafka.get_consumer_handlers();
       let test_message = {
         topic: 'test',
-        value: Buffer.from(JSON.stringify(''))
+        value: Buffer.from(EJSON.stringify(''))
       };
 
       consumer.topics({
@@ -123,7 +124,7 @@ describe('Consumer', function () {
       let handlers = Kafka.get_consumer_handlers();
       let test_message = {
         topic: 'should_fire',
-        value: Buffer.from(JSON.stringify(''))
+        value: Buffer.from(EJSON.stringify(''))
       };
 
       consumer.topics({
@@ -153,15 +154,15 @@ describe('Consumer', function () {
       let handlers = Kafka.get_consumer_handlers();
       let test_message = {
         topic: 'should_fire',
-        value: Buffer.from(JSON.stringify(''))
+        value: Buffer.from(EJSON.stringify(''))
       };
       let another_test_message = {
         topic: 'also_fire',
-        value: Buffer.from(JSON.stringify(''))
+        value: Buffer.from(EJSON.stringify(''))
       };
       let wildcard_test_message = {
         topic: 'wildcard',
-        value: Buffer.from(JSON.stringify(''))
+        value: Buffer.from(EJSON.stringify(''))
       };
 
       consumer.topics({
