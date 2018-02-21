@@ -88,8 +88,6 @@ class Consumer {
     let active_topics = get_active_topics();
     let handlers = get_topic_handlers();
 
-    consumer.unsubscribe();
-
     if (topic) {
       log('Unsubscribing from:', topic);
       let index = active_topics.indexOf(topic);
@@ -100,11 +98,18 @@ class Consumer {
       delete handlers[topic]
     }
     else {
+      log('Unsubscribing from all topics.');
       set_active_topics([]);
       reset_handlers();
     }
 
+    consumer.unsubscribe();
+
     return this;
+  }
+
+  unsubscribe () {
+    this.starve(arguments);
   }
 
   on (event, callback) {

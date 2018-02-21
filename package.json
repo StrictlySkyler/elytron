@@ -44,8 +44,9 @@
     "babel-preset-es2015": "~6.18.0"
   },
   "dependencies": {
-    "debug": "~2.5.1",
-    "node-rdkafka": "~0.6.2",
-    "uuid": "~3.0.1"
+    "debug": "2.5.1",
+    "node-rdkafka": "v2.2.3",
+    "underscore": "1.8.3",
+    "uuid": "3.0.1"
   }
 }

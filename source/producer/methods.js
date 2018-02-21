@@ -1,6 +1,7 @@
 import uuid from 'uuid';
 import BrokerError from '../error';
 import debug from 'debug';
+import _ from 'underscore';
 
 let log = debug('elytron:log');
 let error = debug('elytron:error');
@@ -69,7 +70,9 @@ let poll_producer = function (topic, message_package) {
 
 let set_timer = function (callback, ms) {
   if (typeof Meteor != 'undefined') return Meteor.setTimeout(callback, ms);
-  return setTimeout(callback, ms);
+  let timer = setTimeout(callback, ms);
+  log(timer);
+  return timer;
 };
 
 let clear_timer = function (timer) {

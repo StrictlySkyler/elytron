@@ -23,21 +23,19 @@ let validate_arguments = function (topic, message, work) {
 
   if (
     ! topic ||
-    ! message ||
-    ! message instanceof Object ||
-    message instanceof Array
+    (message && (! message instanceof Object || message instanceof Array))
   ) {
     reason +=
-      'Both `topic` and `message` are required to produce a message.\n' +
-      'Additionally, `message` must be an object.';
+      '\tA `topic` is required to produce a message.\n' +
+      '\tAdditionally, if provided, `message` must be an object.';
     throw new BrokerError(reason);
   }
 
   if (work && ! typeof work == 'function') {
     reason +=
-      'If either `awaiting` or `consumer_work` arguments are passed,\n' +
-      'the other must also be present.\n' +
-      'Also, `awaiting` must be boolean, and `consumer_work` a function.';
+      '\tIf either `awaiting` or `consumer_work` arguments are passed,\n' +
+      '\tthe other must also be present.\n' +
+      '\tAlso, `awaiting` must be boolean, and `consumer_work` a function.';
     throw new BrokerError(reason);
   }
   return true;
@@ -82,8 +80,6 @@ let await_response = function (topic, message, work) {
 
   long_running = set_timer(function () {
 
-    consumer.unsubscribe(awaiting_topic);
-
     error(
       'Disconnected from long-running consumer topic:',
       awaiting_topic,
@@ -91,17 +87,15 @@ let await_response = function (topic, message, work) {
       LONG_RUNNING_TOPIC_WAIT_MS
     );
 
+    consumer.unsubscribe(awaiting_topic);
+
   }, LONG_RUNNING_TOPIC_WAIT_MS);
 
   message.awaiting_topic = awaiting_topic;
   return message;
 };
 
-let produce = function (args) {
-
-  let topic = args.topic;
-  let message = args.message;
-  let work = args.work;
+let produce = function (topic, message, work) {
 
   validate_arguments(topic, message, work);
 
