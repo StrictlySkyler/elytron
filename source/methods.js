@@ -99,12 +99,7 @@ let produce = function (topic, message, work) {
 
   validate_arguments(topic, message, work);
 
-  log(
-    'Attempting to broker topic:\n',
-    topic,
-    '\nwith message:\n',
-    message
-  );
+  log(`Attempting to broker topic: ${topic} with message: ${message}`);
 
   if (work) { await_response(topic, message, work); }
 

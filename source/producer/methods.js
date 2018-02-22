@@ -71,12 +71,13 @@ let poll_producer = function (topic, message_package) {
 let set_timer = function (callback, ms) {
   if (typeof Meteor != 'undefined') return Meteor.setTimeout(callback, ms);
   let timer = setTimeout(callback, ms);
-  log(timer);
+  log(`SET TIMER: ${Object.keys(timer)}`);
   return timer;
 };
 
 let clear_timer = function (timer) {
   if (typeof Meteor != 'undefined') return Meteor.clearTimeout(timer);
+  log(`CLEAR TIMER: ${Object.keys(timer)}`);
   return clearTimeout(timer);
 };
 
