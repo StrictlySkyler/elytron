@@ -1,0 +1,16 @@
+sudo: required
+language: node_js
+node_js:
+  - 8
+
+env:
+  global:
+    - "CI=true"
+
+install:
+  - npm i -g babel-cli mocha
+  - npm i
+
+script:
+  - npm run test
+
