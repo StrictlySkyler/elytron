@@ -51,8 +51,7 @@ console.log(status);
 //      // registration: 1484272028549
 //      presses: 'stop'
 //    }
-//  },
-//  results: {"timestamp:1484272028549","id":"1befd1ad-351e-47fe-bb1a-eb5019cbfbd9","value":{"presses":"stop"}}
+//  }
 //}
 ```
 
@@ -73,9 +72,7 @@ produce('an_interesting_topic', a_relevant_message, some_work_to_do);
 //      bar: 'bar'
 //    },
 //    response_topic: "response.an_interesting_topic.1befd1ad-351e-47fe-bb1a-eb5019cbfbd9"
-//  },
-//  results: {"timestamp:1484272028549","id":"1befd1ad-351e-47fe-bb1a-eb5019cbfbd9","value":{"bar":"bar"},response_topic:"response.an_interesting_topic.1befd1ad-351e-47fe-bb1a-eb5019cbfbd9"},
-//  "1befd1ad-351e-47fe-bb1a-eb5019cbfbd9": [ReadableStream]
+//  }
 //}
 ```
 
