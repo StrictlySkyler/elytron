@@ -1,16 +1,17 @@
 {
   "name": "elytron",
-  "version": "1.1.2",
-  "description": "An interface for Kafka in Node and Meteor",
-  "main": "./distribution/index.js",
+  "version": "2.0.0",
+  "description": "An interface for Kafka in Node",
+  "main": "./dist/src/index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register --recursive $(find test/ ! -path '*stubs*')",
-    "watch": "mocha -w --compilers js:babel-core/register --recursive $(find test/ ! -path '*stubs*')",
-    "build": "babel source lib --presets babel-preset-es2015 --out-dir distribution",
-    "prepublish": "npm run build"
+    "test": "./lib/test.sh",
+    "watch": "./lib/watch.sh",
+    "build": "./lib/build.sh",
+    "prepublish": "npm run build",
+    "postinstall": "./lib/postinstall.sh"
   },
   "repository": {
     "type": "git",
@@ -40,12 +41,12 @@
   },
   "homepage": "https://github.com/StrictlySkyler/elytron#readme",
   "devDependencies": {
-    "babel-core": "~6.21.0",
-    "babel-preset-es2015": "~6.18.0"
+    "babel-core": "6.21.0",
+    "babel-preset-es2015": "6.18.0"
   },
   "dependencies": {
-    "debug": "~2.5.1",
-    "node-rdkafka": "~0.6.2",
-    "uuid": "~3.0.1"
+    "debug": "3.1.0",
+    "mocha": "^5.0.1",
+    "uuid": "3.2.1"
   }
 }
