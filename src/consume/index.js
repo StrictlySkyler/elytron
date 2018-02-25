@@ -39,10 +39,10 @@ const teardown_consumer = (topic, id) => {
   return registered_consumers[topic];
 };
 
-const consume_multi_topics = (topics, work, offset, exit) => {
+const consume_multi_topics = (topics, work, group, offset, exit) => {
   let new_consumers = [];
   topics.forEach((topic) => {
-    new_consumers.push(consume(topic, work, offset, exit));
+    new_consumers.push(consume(topic, work, group, offset, exit));
   });
 
   return new_consumers;
@@ -101,17 +101,18 @@ const validate_arguments = (topic, work) => {
   return true;
 };
 
-const consume = (topic, work, offset = 'beginning', exit = false) => {
+const consume = (topic, work, group, offset = 'beginning', exit = false) => {
   if (validate_arguments(topic, work).multi) return consume_multi_topics(
-    topic, work, offset, exit
+    topic, work, group, offset, exit
   );
 
-  if (topic === '*') return consume(list_topics(), work, offset, exit);
+  if (topic === '*') return consume(list_topics(), work, group, offset, exit);
 
+  let consumer_type = group ? ['-G', group] : ['-C'];
   const id = uuid.v4();
-  const consume_options = [
-    '-C', '-b', brokers, '-t', topic, '-D', delimiter, '-o', offset, '-u'
-  ];
+  const consume_options = consumer_type.concat([
+    '-b', brokers, '-t', topic, '-D', delimiter, '-o', offset, '-u'
+  ]);
 
   log(`Consuming ${topic} at offset ${offset}`);
   const consumer = spawn(kafkacat, consume_options);
