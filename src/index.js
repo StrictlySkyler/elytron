@@ -8,5 +8,9 @@ log(`Loading elytron using broker host string: ${brokers}`);
 decorate_producer(spawn);
 decorate_consumer(run, spawn);
 
+process.on('SIGINT', () => starve('*'));
+process.on('SIGTERM', () => starve('*'));
+process.on('exit', () => starve('*'));
+
 export { produce, consume, starve };
 

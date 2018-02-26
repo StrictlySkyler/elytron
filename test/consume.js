@@ -10,6 +10,7 @@ let spawn = () => ({
   on: () => {},
   stdout: { on: () => {}, destroy: () => {} },
   stderr: { on: () => {}, destroy: () => {} },
+  kill: () => {},
 });
 const topic = 'news';
 

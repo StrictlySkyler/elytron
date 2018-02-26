@@ -31,8 +31,10 @@ const list_topics = () => {
 const teardown_consumer = (topic, id) => {
   const target_consumer = registered_consumers[topic][id];
 
+  log(`Consumer teardown: ${topic} ${id}`);
   target_consumer.stdout.destroy();
   target_consumer.stderr.destroy();
+  target_consumer.kill();
 
   delete registered_consumers[topic][id];
 
@@ -131,6 +133,13 @@ const starve = (topic, id) => {
   if (! topic || typeof topic != 'string') throw new BrokerError(
     'A topic argument is required!  It must be either an Array or String.'
   );
+
+  if (topic == '*') {
+    Object.keys(registered_consumers).forEach((consumed_topic) => {
+      starve(consumed_topic);
+    });
+    return registered_consumers;
+  }
 
   if (
     ! registered_consumers[topic] ||
