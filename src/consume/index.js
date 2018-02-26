@@ -108,10 +108,10 @@ const consume = (topic, work, group, offset = 'beginning', exit = false) => {
 
   if (topic === '*') return consume(list_topics(), work, group, offset, exit);
 
-  let consumer_type = group ? ['-G', group] : ['-C'];
+  let consumer_type = group ? ['-G', group, topic] : ['-C', '-t', topic];
   const id = uuid.v4();
   const consume_options = consumer_type.concat([
-    '-b', brokers, '-t', topic, '-D', delimiter, '-o', offset, '-u'
+    '-b', brokers, '-D', delimiter, '-o', offset, '-u'
   ]);
 
   log(`Consuming ${topic} at offset ${offset}`);
