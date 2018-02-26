@@ -3,7 +3,7 @@
 
 _n._
 
-1. ~~The hardened wings of a beetle.~~<sup>[1](https://en.wikipedia.org/wiki/The_Metamorphosis)</sup>
+1. ~~The hardened shell of a beetle.~~<sup>[1](https://en.wikipedia.org/wiki/The_Metamorphosis)</sup>
 2. A handy interface for Kafka in Node.
 
 Compatible with Kafka 0.8.x.x and higher.
