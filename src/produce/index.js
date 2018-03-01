@@ -12,7 +12,7 @@ const await_response = (topic, id, work) => {
   const exit = true; // Cleanup when we've received our response
   const response_topic = `response.${topic}.${id}`;
   produce(response_topic, null, null, () => { // Create the response topic
-    consume(response_topic, work, false, offset, exit);
+    consume(response_topic, work, { group: false, offset, exit });
   });
 
   return response_topic;

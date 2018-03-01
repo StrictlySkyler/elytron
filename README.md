@@ -101,14 +101,14 @@ consume(['media', 'entertainment'], (msg) => {
 });
 
 // Consume as a High-Level Consumer, part of a balanced Consumer Group
-consume(topic, work, group);
+consume(topic, work, { group: 'engineering' });
 
 // Consume a topic starting at offset 5 (e.g. consume from the 6th on), and
 // continue through all subsequent messages
-consume(topic, work, false, 5);
+consume(topic, work, { group: false, offset: 5 });
 
 // Same as above, but exit when the last message has been consumed
-consume(topic, work, false, 5, true);
+consume(topic, work, { group: false, offset: 5, exit: true });
 
 // Consume on all available topics
 consume('*', (msg) => {});
