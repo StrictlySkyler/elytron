@@ -20,6 +20,13 @@ Elytron's API exposes three things:
 import { produce, consume, starve } from 'elytron';
 ```
 
+You'll need to ensure the `KAFKA_BROKERS` environment variable is set to the comma-separated list of brokers you want to use, e.g.:
+```bash
+export KAFKA_BROKERS="broker1,broker2,broker3"
+# For local testing, such as with a kafka docker cluster:
+KAFKA_BROKERS="localhost:9092,localhost:9093,localhost:9094" npm start
+```
+
 ### Producing Messages
 A message can be produced and sent to Kafka on a topic by calling the `produce` function and passing it the name of a topic as a string.  Example:
 
