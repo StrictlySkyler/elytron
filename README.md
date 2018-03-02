@@ -83,7 +83,19 @@ produce('an_interesting_topic', a_relevant_message, some_work_to_do);
 //}
 ```
 
-If a callback is provided, elytron will create a "private" topic using a UUID, automatically create a consumer for it, and include the name of the `response_topic` in its initial message payload.  This allows for a consumer listening on the initial topic to provide a response message, which is in turn passed to the `some_work_to_do` callback as a response.
+If a callback is provided, elytron will create a "private" topic using a UUID, automatically create a consumer for it, and include the name of the `response_topic` in its initial message payload.  This allows for a consumer listening on the initial topic to provide a response message, which is in turn passed to the callback as a response.  Example:
+
+```javascript
+  consume('an_interesting_topic', (msg) => {
+    // Do some work with what you consume
+    return 'a_reply_message'
+  });
+  
+  produce('an_interesting_topic', a_relevant_message, (response) => {
+    const { payload: { value } } = JSON.parse(response);
+    console.log(value); // 'a_reply_message'
+  });
+```
 
 ### Consuming Messages
 
