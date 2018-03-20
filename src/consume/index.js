@@ -106,7 +106,7 @@ const validate_arguments = (topic, work) => {
 const consume = (topic, work, options = {
   group: false, offset: 'beginning', exit: false
 }) => {
-  const { group = false, offset = 'beginnging', exit = false } = options;
+  const { group = false, offset = 'beginning', exit = false } = options;
   if (
     validate_arguments(topic, work).multi && ! group
   ) return consume_multi_topics(topic, work, options);
