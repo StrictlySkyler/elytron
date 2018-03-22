@@ -51,7 +51,7 @@ const consume_multi_topics = (topics, work, options) => {
 };
 
 const handle_consumer_data = (data, topic, id, work, exit) => {
-  let parsed = data.toString().split(delimiter);
+  let parsed = data.split(delimiter);
   log(`Consumed data from ${topic}: ${parsed}`);
   parsed.pop(); // Empty string after delimiter
   parsed.forEach((item) => {
@@ -72,7 +72,7 @@ const handle_consumer_data = (data, topic, id, work, exit) => {
 };
 
 const handle_consumer_error = (err) => error(
-  `Received error from consumer: ${err.toString()}`
+  `Received error from consumer: ${err}`
 );
 
 const handle_consumer_close = (code) => {
@@ -122,14 +122,25 @@ const consume = (topic, work, options = {
     '-b', brokers, '-D', delimiter, '-o', offset, '-u'
   ].concat(consumer_type);
 
+  let stdout = '';
+  let stderr = '';
+
   log(`Consuming ${topic} at offset ${offset}`);
   const consumer = spawn(kafkacat, consume_options);
-  consumer.stdout.on('data', data => handle_consumer_data(
-    data, topic, id, work, exit
-  ));
-  consumer.stderr.on('data', data => handle_consumer_error(
-    data, topic, work, exit
-  ));
+
+  consumer.stdout.on('data', data => stdout += data.toString());
+  consumer.stderr.on('data', data => stderr += data.toString());
+
+  consumer.stdout.on('end', () => {
+    handle_consumer_data(stdout, topic, id, work, exit);
+    stdout = '';
+    return stdout;
+  });
+  consumer.stderr.on('end', () => {
+    handle_consumer_error(stderr);
+    stderr = '';
+    return stderr;
+  });
   consumer.on('close', handle_consumer_close);
 
   return register_consumer(consumer, topic, id);
