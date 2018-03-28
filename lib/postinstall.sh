@@ -20,3 +20,4 @@ if [ -z "$kafkacat" ]; then
 fi
 
 log "Found kafkacat at: $kafkacat"
+
