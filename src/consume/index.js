@@ -51,24 +51,36 @@ const consume_multi_topics = (topics, work, options) => {
 };
 
 const handle_consumer_data = (data, topic, id, work, exit) => {
-  let parsed = data.split(delimiter);
-  log(`Consumed data from ${topic}: ${parsed}`);
-  parsed.pop(); // Empty string after delimiter
-  parsed.forEach((item) => {
-    let results = work(item);
-    let deserialized = {};
+  let parsed = data.split(delimiter).reverse();
+  // Remove any empty string after the delimiter
+  if (parsed[0] === '') parsed.shift();
 
-    try { deserialized = JSON.parse(item); }
-    catch (err) { deserialized.response_topic = false; }
+  let i = parsed.length;
 
-    if (deserialized.response_topic) produce(
-      deserialized.response_topic, results
-    );
-  });
+  while (i--) {
+    try { // Attempt to parse our most recent chunk
+      let deserialized = JSON.parse(parsed[i]);
+      let payload;
+
+      log(`Consumed data from ${topic}: ${deserialized.payload}`);
+      let results = work(deserialized.payload);
+
+      try { payload = JSON.parse(deserialized.payload); }
+      catch (e) { payload = deserialized.payload; }
+
+      if (payload.response_topic) produce(payload.response_topic, results);
+    }
+    catch (err) { // Incomplete chunk from string, save for next event
+      error(`Unable to parse data chunk: ${parsed[i]}`, err);
+      break;
+    }
+
+    parsed.splice(i, 1);
+  }
 
   if (exit) teardown_consumer(topic, id);
 
-  return parsed;
+  return parsed.join('');
 };
 
 const handle_consumer_error = (err) => error(
@@ -119,28 +131,22 @@ const consume = (topic, work, options = {
   ;
   const id = uuid.v4();
   const consume_options = [
-    '-b', brokers, '-D', delimiter, '-o', offset, '-u'
+    '-b', brokers, '-D', delimiter, '-o', offset, '-u', '-J',
   ].concat(consumer_type);
 
   let stdout = '';
-  let stderr = '';
 
   log(`Consuming ${topic} at offset ${offset}`);
   const consumer = spawn(kafkacat, consume_options);
 
-  consumer.stdout.on('data', data => stdout += data.toString());
-  consumer.stderr.on('data', data => stderr += data.toString());
+  consumer.stdout.on('data', (data) => {
+    stdout += data.toString();
+    stdout = handle_consumer_data(stdout, topic, id, work, exit);
+  });
+  consumer.stderr.on('data', (data) => {
+    handle_consumer_error(data.toString());
+  });
 
-  consumer.stdout.on('end', () => {
-    handle_consumer_data(stdout, topic, id, work, exit);
-    stdout = '';
-    return stdout;
-  });
-  consumer.stderr.on('end', () => {
-    handle_consumer_error(stderr);
-    stderr = '';
-    return stderr;
-  });
   consumer.on('close', handle_consumer_close);
 
   return register_consumer(consumer, topic, id);
