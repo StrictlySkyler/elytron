@@ -149,13 +149,18 @@ var consume = function consume(topic, work) {
   var consume_options = ['-b', _run.brokers, '-D', delimiter, '-o', offset, '-u', '-J'].concat(consumer_type);
 
   var stdout = '';
+  var stale_cache_timer = void 0;
 
   (0, _logger.log)('Consuming ' + topic + ' at offset ' + offset);
   var consumer = spawn(_run.kafkacat, consume_options);
 
   consumer.stdout.on('data', function (data) {
+    clearTimeout(stale_cache_timer);
     stdout += data.toString();
     stdout = handle_consumer_data(stdout, topic, id, work, exit);
+    stale_cache_timer = setTimeout(function () {
+      return stdout = '';
+    }, process.env.STALE_CACHE_TIMER || 3600000);
   });
   consumer.stderr.on('data', function (data) {
     handle_consumer_error(data.toString());
