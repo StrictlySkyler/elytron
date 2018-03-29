@@ -125,6 +125,9 @@ const consume = (topic, work, options = {
 
   if (topic === '*') return consume(list_topics(), work, options);
 
+  let refresh_interval = process.env.KAFKA_TOPIC_METADATA_REFRESH_INTERVAL_MS ||
+    60000
+  ;
   let consumer_type = group ?
     ['-G', group, (topic instanceof Array ? topic.join(' ') : topic)] :
     ['-C', '-t', topic]
@@ -132,6 +135,7 @@ const consume = (topic, work, options = {
   const id = uuid.v4();
   const consume_options = [
     '-b', brokers, '-D', delimiter, '-o', offset, '-u', '-J',
+    '-X', `topic.metadata.refresh.interval.ms=${refresh_interval}`,
   ].concat(consumer_type);
 
   let stdout = '';
@@ -146,7 +150,7 @@ const consume = (topic, work, options = {
     stdout = handle_consumer_data(stdout, topic, id, work, exit);
     stale_cache_timer = setTimeout(
       () => stdout = '',
-      process.env.STALE_CACHE_TIMER || 3600000
+      process.env.ELYTRON_STALE_CACHE_TIMER || refresh_interval
     );
   });
   consumer.stderr.on('data', (data) => {
