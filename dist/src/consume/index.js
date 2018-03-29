@@ -144,9 +144,10 @@ var consume = function consume(topic, work) {
 
   if (topic === '*') return consume(list_topics(), work, options);
 
+  var refresh_interval = process.env.KAFKA_TOPIC_METADATA_REFRESH_INTERVAL_MS || 60000;
   var consumer_type = group ? ['-G', group, topic instanceof Array ? topic.join(' ') : topic] : ['-C', '-t', topic];
   var id = _uuid2.default.v4();
-  var consume_options = ['-b', _run.brokers, '-D', delimiter, '-o', offset, '-u', '-J'].concat(consumer_type);
+  var consume_options = ['-b', _run.brokers, '-D', delimiter, '-o', offset, '-u', '-J', '-X', 'topic.metadata.refresh.interval.ms=' + refresh_interval].concat(consumer_type);
 
   var stdout = '';
   var stale_cache_timer = void 0;
@@ -160,7 +161,7 @@ var consume = function consume(topic, work) {
     stdout = handle_consumer_data(stdout, topic, id, work, exit);
     stale_cache_timer = setTimeout(function () {
       return stdout = '';
-    }, process.env.STALE_CACHE_TIMER || 3600000);
+    }, process.env.ELYTRON_STALE_CACHE_TIMER || refresh_interval);
   });
   consumer.stderr.on('data', function (data) {
     handle_consumer_error(data.toString());
