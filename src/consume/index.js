@@ -135,13 +135,16 @@ const consume = (topic, work, options = {
   ].concat(consumer_type);
 
   let stdout = '';
+  let stale_cache_timer;
 
   log(`Consuming ${topic} at offset ${offset}`);
   const consumer = spawn(kafkacat, consume_options);
 
   consumer.stdout.on('data', (data) => {
+    clearTimeout(stale_cache_timer);
     stdout += data.toString();
     stdout = handle_consumer_data(stdout, topic, id, work, exit);
+    stale_cache_timer = setTimeout(() => stdout = '', 3600000);
   });
   consumer.stderr.on('data', (data) => {
     handle_consumer_error(data.toString());
