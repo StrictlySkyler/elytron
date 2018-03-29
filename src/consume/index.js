@@ -144,7 +144,10 @@ const consume = (topic, work, options = {
     clearTimeout(stale_cache_timer);
     stdout += data.toString();
     stdout = handle_consumer_data(stdout, topic, id, work, exit);
-    stale_cache_timer = setTimeout(() => stdout = '', 3600000);
+    stale_cache_timer = setTimeout(
+      () => stdout = '',
+      process.env.STALE_CACHE_TIMER || 3600000
+    );
   });
   consumer.stderr.on('data', (data) => {
     handle_consumer_error(data.toString());
