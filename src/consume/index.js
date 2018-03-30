@@ -88,10 +88,12 @@ const handle_consumer_data = (data, topic, id, work, exit) => {
 };
 
 const handle_consumer_error = (err, topic, id) => {
-  let disconnect_msg = 'Broker transport failure';
+  let transport_msg = 'Broker transport failure';
+  let host_msg = 'Host resolution failure';
+
   error(`Received error from consumer: ${err}`);
 
-  if (err.match(disconnect_msg)) {
+  if (err.match(transport_msg) || err.match(host_msg)) {
     log('Attempting to reconnect...');
     teardown_consumer(topic, id);
   }
@@ -136,7 +138,7 @@ const validate_arguments = (topic, work) => {
 const consume = (topic, work, options = {
   group: false, offset: 'end', exit: false
 }) => {
-  const { group = false, offset = 'beginning', exit = false } = options;
+  const { group = false, offset = 'end', exit = false } = options;
   if (
     validate_arguments(topic, work).multi && ! group
   ) return consume_multi_topics(topic, work, options);

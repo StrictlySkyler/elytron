@@ -103,10 +103,12 @@ var handle_consumer_data = function handle_consumer_data(data, topic, id, work, 
 };
 
 var handle_consumer_error = function handle_consumer_error(err, topic, id) {
-  var disconnect_msg = 'Broker transport failure';
+  var transport_msg = 'Broker transport failure';
+  var host_msg = 'Host resolution failure';
+
   (0, _logger.error)('Received error from consumer: ' + err);
 
-  if (err.match(disconnect_msg)) {
+  if (err.match(transport_msg) || err.match(host_msg)) {
     (0, _logger.log)('Attempting to reconnect...');
     teardown_consumer(topic, id);
   }
@@ -150,7 +152,7 @@ var consume = function consume(topic, work) {
   var _options$group = options.group,
       group = _options$group === undefined ? false : _options$group,
       _options$offset = options.offset,
-      offset = _options$offset === undefined ? 'beginning' : _options$offset,
+      offset = _options$offset === undefined ? 'end' : _options$offset,
       _options$exit = options.exit,
       exit = _options$exit === undefined ? false : _options$exit;
 
