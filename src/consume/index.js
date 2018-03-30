@@ -87,8 +87,17 @@ const handle_consumer_error = (err) => error(
   `Received error from consumer: ${err}`
 );
 
-const handle_consumer_close = (code) => {
-  log(`Consumer exited with code ${code}`);
+const handle_consumer_close = (code, topic, work, options) => {
+  let msg = `Consumer exited with code ${code}`;
+
+  if (code === 0) log(msg);
+  else if (! options.exit) {
+    msg += ', restarting consumer...';
+    log(msg);
+    consume(topic, work, options);
+  }
+  else throw new BrokerError(msg);
+
   return code;
 };
 
@@ -157,7 +166,9 @@ const consume = (topic, work, options = {
     handle_consumer_error(data.toString());
   });
 
-  consumer.on('close', handle_consumer_close);
+  consumer.on('close', (code) => {
+    handle_consumer_close(code, topic, work, options);
+  });
 
   return register_consumer(consumer, topic, id);
 };

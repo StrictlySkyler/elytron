@@ -105,8 +105,15 @@ var handle_consumer_error = function handle_consumer_error(err) {
   return (0, _logger.error)('Received error from consumer: ' + err);
 };
 
-var handle_consumer_close = function handle_consumer_close(code) {
-  (0, _logger.log)('Consumer exited with code ' + code);
+var handle_consumer_close = function handle_consumer_close(code, topic, work, options) {
+  var msg = 'Consumer exited with code ' + code;
+
+  if (code === 0) (0, _logger.log)(msg);else if (!options.exit) {
+    msg += ', restarting consumer...';
+    (0, _logger.log)(msg);
+    consume(topic, work, options);
+  } else throw new _error.BrokerError(msg);
+
   return code;
 };
 
@@ -167,7 +174,9 @@ var consume = function consume(topic, work) {
     handle_consumer_error(data.toString());
   });
 
-  consumer.on('close', handle_consumer_close);
+  consumer.on('close', function (code) {
+    handle_consumer_close(code, topic, work, options);
+  });
 
   return register_consumer(consumer, topic, id);
 };
