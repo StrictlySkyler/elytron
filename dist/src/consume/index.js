@@ -109,9 +109,12 @@ var handle_consumer_close = function handle_consumer_close(code, topic, work, op
   var msg = 'Consumer exited with code ' + code;
 
   if (code === 0) (0, _logger.log)(msg);else if (!options.exit) {
+    var restart_consumer_interval = process.env.KAFKA_RESTART_CONSUMER_INTERVAL_MS || 1000;
     msg += ', restarting consumer...';
     (0, _logger.log)(msg);
-    consume(topic, work, options);
+    setTimeout(function () {
+      consume(topic, work, options);
+    }, restart_consumer_interval);
   } else throw new _error.BrokerError(msg);
 
   return code;

@@ -92,9 +92,15 @@ const handle_consumer_close = (code, topic, work, options) => {
 
   if (code === 0) log(msg);
   else if (! options.exit) {
+    const restart_consumer_interval = process.env
+      .KAFKA_RESTART_CONSUMER_INTERVAL_MS ||
+      1000
+    ;
     msg += ', restarting consumer...';
     log(msg);
-    consume(topic, work, options);
+    setTimeout(() => {
+      consume(topic, work, options);
+    }, restart_consumer_interval);
   }
   else throw new BrokerError(msg);
 
