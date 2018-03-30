@@ -9,6 +9,10 @@ let run;
 let spawn;
 
 const delimiter = ':msg:';
+const restart_consumer_interval = process.env
+  .KAFKA_RESTART_CONSUMER_INTERVAL_MS ||
+  1000
+;
 
 const decorate_consumer = (Run, Spawn) => {
   run = Run;
@@ -83,24 +87,23 @@ const handle_consumer_data = (data, topic, id, work, exit) => {
   return parsed.join('');
 };
 
-const handle_consumer_error = (err) => error(
-  `Received error from consumer: ${err}`
-);
+const handle_consumer_error = (err, topic, id) => {
+  let disconnect_msg = 'Broker transport failure';
+  error(`Received error from consumer: ${err}`);
+
+  if (err.match(disconnect_msg)) {
+    log('Attempting to reconnect...');
+    teardown_consumer(topic, id);
+  }
+};
 
 const handle_consumer_close = (code, topic, work, options) => {
   let msg = `Consumer exited with code ${code}`;
 
-  if (code === 0) log(msg);
-  else if (! options.exit) {
-    const restart_consumer_interval = process.env
-      .KAFKA_RESTART_CONSUMER_INTERVAL_MS ||
-      1000
-    ;
-    msg += ', restarting consumer...';
-    log(msg);
-    setTimeout(() => {
-      consume(topic, work, options);
-    }, restart_consumer_interval);
+  log(msg);
+  if (! options.exit) {
+    log(`Restarting consumer...`);
+    setTimeout(consume, restart_consumer_interval, topic, work, options);
   }
   else throw new BrokerError(msg);
 
@@ -131,7 +134,7 @@ const validate_arguments = (topic, work) => {
 };
 
 const consume = (topic, work, options = {
-  group: false, offset: 'beginning', exit: false
+  group: false, offset: 'end', exit: false
 }) => {
   const { group = false, offset = 'beginning', exit = false } = options;
   if (
@@ -169,7 +172,7 @@ const consume = (topic, work, options = {
     );
   });
   consumer.stderr.on('data', (data) => {
-    handle_consumer_error(data.toString());
+    handle_consumer_error(data.toString(), topic, id);
   });
 
   consumer.on('close', (code) => {

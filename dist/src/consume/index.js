@@ -24,6 +24,7 @@ var run = void 0;
 var spawn = void 0;
 
 var delimiter = ':msg:';
+var restart_consumer_interval = process.env.KAFKA_RESTART_CONSUMER_INTERVAL_MS || 1000;
 
 var decorate_consumer = function decorate_consumer(Run, Spawn) {
   run = Run;
@@ -101,20 +102,23 @@ var handle_consumer_data = function handle_consumer_data(data, topic, id, work, 
   return parsed.join('');
 };
 
-var handle_consumer_error = function handle_consumer_error(err) {
-  return (0, _logger.error)('Received error from consumer: ' + err);
+var handle_consumer_error = function handle_consumer_error(err, topic, id) {
+  var disconnect_msg = 'Broker transport failure';
+  (0, _logger.error)('Received error from consumer: ' + err);
+
+  if (err.match(disconnect_msg)) {
+    (0, _logger.log)('Attempting to reconnect...');
+    teardown_consumer(topic, id);
+  }
 };
 
 var handle_consumer_close = function handle_consumer_close(code, topic, work, options) {
   var msg = 'Consumer exited with code ' + code;
 
-  if (code === 0) (0, _logger.log)(msg);else if (!options.exit) {
-    var restart_consumer_interval = process.env.KAFKA_RESTART_CONSUMER_INTERVAL_MS || 1000;
-    msg += ', restarting consumer...';
-    (0, _logger.log)(msg);
-    setTimeout(function () {
-      consume(topic, work, options);
-    }, restart_consumer_interval);
+  (0, _logger.log)(msg);
+  if (!options.exit) {
+    (0, _logger.log)('Restarting consumer...');
+    setTimeout(consume, restart_consumer_interval, topic, work, options);
   } else throw new _error.BrokerError(msg);
 
   return code;
@@ -141,7 +145,7 @@ var validate_arguments = function validate_arguments(topic, work) {
 
 var consume = function consume(topic, work) {
   var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
-    group: false, offset: 'beginning', exit: false
+    group: false, offset: 'end', exit: false
   };
   var _options$group = options.group,
       group = _options$group === undefined ? false : _options$group,
@@ -174,7 +178,7 @@ var consume = function consume(topic, work) {
     }, process.env.ELYTRON_STALE_CACHE_TIMER || refresh_interval);
   });
   consumer.stderr.on('data', function (data) {
-    handle_consumer_error(data.toString());
+    handle_consumer_error(data.toString(), topic, id);
   });
 
   consumer.on('close', function (code) {
