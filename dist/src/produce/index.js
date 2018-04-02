@@ -38,7 +38,7 @@ var await_response = function await_response(topic, id, work) {
 };
 
 var handle_producer_error = function handle_producer_error(data) {
-  return (0, _logger.error)('Producer logged an error: ' + data.toString());
+  throw new _error.BrokerError('Producer logged an error: ' + data.toString());
 };
 
 var handle_producer_data = function handle_producer_data(data) {

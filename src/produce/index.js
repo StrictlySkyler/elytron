@@ -1,6 +1,6 @@
 import fs from 'fs';
 import uuid from 'uuid';
-import { log, error } from '../../lib/logger';
+import { log } from '../../lib/logger';
 import { BrokerError } from '../../lib/error';
 import { kafkacat, tmp, brokers } from '../../lib/run';
 import { consume } from '../consume';
@@ -18,9 +18,9 @@ const await_response = (topic, id, work) => {
   return response_topic;
 };
 
-const handle_producer_error = (data) => error(
-  `Producer logged an error: ${data.toString()}`
-);
+const handle_producer_error = (data) => {
+  throw new BrokerError(`Producer logged an error: ${data.toString()}`);
+};
 
 const handle_producer_data = (data) => log(
   `Producer logged some data: ${data.toString()}`
