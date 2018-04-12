@@ -20,13 +20,16 @@ var _run = require('../lib/run');
 (0, _consume.decorate_consumer)(_run.run, _child_process.spawn);
 
 process.on('SIGINT', function () {
-  return (0, _consume.starve)('*');
+  (0, _consume.starve)('*');
+  process.exit();
 });
 process.on('SIGTERM', function () {
-  return (0, _consume.starve)('*');
+  (0, _consume.starve)('*');
+  process.exit();
 });
 process.on('exit', function () {
-  return (0, _consume.starve)('*');
+  (0, _consume.starve)('*');
+  process.exit();
 });
 
 exports.produce = _produce.produce;
