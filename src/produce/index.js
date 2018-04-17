@@ -1,6 +1,6 @@
 import fs from 'fs';
 import uuid from 'uuid';
-import { log } from '../../lib/logger';
+import { log, error } from '../../lib/logger';
 import { BrokerError } from '../../lib/error';
 import { kafkacat, tmp, brokers } from '../../lib/run';
 import { consume } from '../consume';
@@ -27,12 +27,14 @@ const handle_producer_data = (data) => log(
 );
 
 const handle_producer_close = (code, message_file_path, callback) => {
-  log(`Producer exited with code: ${code}`);
+  const out = code == 0 ? log : error;
+  out(`Producer exited with code: ${code}`);
   fs.unlink(message_file_path, (err) => {
     if (err) throw err;
-    if (callback) callback();
     return true;
   });
+  if (callback) callback(code);
+  return code;
 };
 
 const pipe_to_kafkacat = (produce_options, message_file_path, callback) => {

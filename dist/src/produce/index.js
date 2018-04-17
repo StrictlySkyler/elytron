@@ -46,12 +46,14 @@ var handle_producer_data = function handle_producer_data(data) {
 };
 
 var handle_producer_close = function handle_producer_close(code, message_file_path, callback) {
-  (0, _logger.log)('Producer exited with code: ' + code);
+  var out = code == 0 ? _logger.log : _logger.error;
+  out('Producer exited with code: ' + code);
   _fs2.default.unlink(message_file_path, function (err) {
     if (err) throw err;
-    if (callback) callback();
     return true;
   });
+  if (callback) callback(code);
+  return code;
 };
 
 var pipe_to_kafkacat = function pipe_to_kafkacat(produce_options, message_file_path, callback) {
