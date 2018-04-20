@@ -6,14 +6,15 @@ import { kafkacat, tmp, brokers } from '../../lib/run';
 import { consume } from '../consume';
 
 let spawn;
+let broker_list;
 
-const await_response = (topic, id, work) => {
+const await_response = (topic, id, work, broker_list) => {
   const offset = 1; // Skip the initial message which creates the topic
   const exit = true; // Cleanup when we've received our response
   const response_topic = `response.${topic}.${id}`;
   produce(response_topic, null, null, () => { // Create the response topic
     consume(response_topic, work, { group: false, offset, exit });
-  });
+  }, broker_list);
 
   return response_topic;
 };
@@ -49,19 +50,20 @@ const pipe_to_kafkacat = (produce_options, message_file_path, callback) => {
   return producer;
 };
 
-const produce = (topic, message, work, callback) => {
+const produce = (topic, message, work, callback, broker_string) => {
   if (! topic) throw new BrokerError('A topic argument is required!');
+  broker_list = broker_string || brokers;
 
   const id = uuid.v4();
   const timestamp = Date.now();
   const payload = { id, timestamp, message };
   const message_file_path = `${tmp}/elytron.message.${topic}.${id}`;
   const produce_options = [
-    '-P', '-T', '-b', brokers, '-t', topic, message_file_path
+    '-P', '-T', '-b', broker_list, '-t', topic, message_file_path
   ];
 
   if (work) {
-    payload.response_topic = await_response(topic, id, work);
+    payload.response_topic = await_response(topic, id, work, broker_list);
     log(`Awaiting response on topic: ${payload.response_topic}`);
   }
 
