@@ -15,14 +15,6 @@ apt=`which apt-get`
 brew=`which brew`
 
 if [ -z "$kafkacat" ]; then
-  log "Attempting to install kafkacat..."
-  git clone https://github.com/edenhill/kafkacat
-  cd ./kafkacat && ./bootstrap.sh
-fi
-
-kafkacat=`which kafkacat`
-
-if [ -z "$kafkacat" ]; then
   log "No kafkacat found!"
   log "Please make sure the kafkacat library is available in the PATH."
   log "See here for details: https://github.com/edenhill/kafkacat"
