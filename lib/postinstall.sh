@@ -14,12 +14,10 @@ kafkacat=`which kafkacat`
 apt=`which apt-get`
 brew=`which brew`
 
-if [ -z "$kafkacat" ] && [ -e "$apt" ]; then
-  log "Attempting to install kafkacat via apt-get..."
-  $apt update && $apt install -y kafkacat
-elif [ -z "$kafkacat" ] && [ -e "$brew" ]; then
-  log "Attempting to install kafkacat via homebrew..."
-  $brew install kafkacat
+if [ -z "$kafkacat" ]; then
+  log "Attempting to install kafkacat..."
+  git clone https://github.com/edenhill/kafkacat
+  cd ./kafkacat && ./bootstrap.sh
 fi
 
 kafkacat=`which kafkacat`
