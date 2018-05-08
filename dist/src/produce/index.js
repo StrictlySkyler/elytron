@@ -24,6 +24,7 @@ var _consume = require('../consume');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var spawn = void 0;
+var broker_list = void 0;
 
 var await_response = function await_response(topic, id, work) {
   var offset = 1; // Skip the initial message which creates the topic
@@ -32,12 +33,14 @@ var await_response = function await_response(topic, id, work) {
   produce(response_topic, null, null, function () {
     // Create the response topic
     (0, _consume.consume)(response_topic, work, { group: false, offset: offset, exit: exit });
-  });
+  }, broker_list);
 
   return response_topic;
 };
 
-var handle_producer_error = function handle_producer_error(data) {
+var handle_producer_error = function handle_producer_error(data, callback) {
+  var error_string = 'Producer logged an error: ' + data.toString();
+  if (callback) return (0, _logger.error)(error_string);
   throw new _error.BrokerError('Producer logged an error: ' + data.toString());
 };
 
@@ -60,7 +63,9 @@ var pipe_to_kafkacat = function pipe_to_kafkacat(produce_options, message_file_p
   var producer = spawn(_run.kafkacat, produce_options);
 
   producer.stdout.on('data', handle_producer_data);
-  producer.stderr.on('data', handle_producer_error);
+  producer.stderr.on('data', function (data) {
+    return handle_producer_error(data, callback);
+  });
   producer.on('close', function (code) {
     return handle_producer_close(code, message_file_path, callback);
   });
@@ -68,14 +73,15 @@ var pipe_to_kafkacat = function pipe_to_kafkacat(produce_options, message_file_p
   return producer;
 };
 
-var produce = function produce(topic, message, work, callback) {
+var produce = function produce(topic, message, work, callback, broker_string) {
   if (!topic) throw new _error.BrokerError('A topic argument is required!');
+  broker_list = broker_string || _run.brokers;
 
   var id = _uuid2.default.v4();
   var timestamp = Date.now();
   var payload = { id: id, timestamp: timestamp, message: message };
   var message_file_path = _run.tmp + '/elytron.message.' + topic + '.' + id;
-  var produce_options = ['-P', '-T', '-b', _run.brokers, '-t', topic, message_file_path];
+  var produce_options = ['-P', '-T', '-b', broker_list, '-t', topic, message_file_path];
 
   if (work) {
     payload.response_topic = await_response(topic, id, work);

@@ -1,6 +1,6 @@
 {
   "name": "elytron",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "An interface for Kafka in Node",
   "main": "./dist/src/index.js",
   "directories": {

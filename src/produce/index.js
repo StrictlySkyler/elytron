@@ -8,7 +8,7 @@ import { consume } from '../consume';
 let spawn;
 let broker_list;
 
-const await_response = (topic, id, work, broker_list) => {
+const await_response = (topic, id, work) => {
   const offset = 1; // Skip the initial message which creates the topic
   const exit = true; // Cleanup when we've received our response
   const response_topic = `response.${topic}.${id}`;
@@ -19,7 +19,9 @@ const await_response = (topic, id, work, broker_list) => {
   return response_topic;
 };
 
-const handle_producer_error = (data) => {
+const handle_producer_error = (data, callback) => {
+  const error_string = `Producer logged an error: ${data.toString()}`;
+  if (callback) return error(error_string);
   throw new BrokerError(`Producer logged an error: ${data.toString()}`);
 };
 
@@ -42,7 +44,7 @@ const pipe_to_kafkacat = (produce_options, message_file_path, callback) => {
   const producer = spawn(kafkacat, produce_options);
 
   producer.stdout.on('data', handle_producer_data);
-  producer.stderr.on('data', handle_producer_error);
+  producer.stderr.on('data', data => handle_producer_error(data, callback));
   producer.on('close', code => handle_producer_close(
     code, message_file_path, callback
   ));
@@ -63,7 +65,7 @@ const produce = (topic, message, work, callback, broker_string) => {
   ];
 
   if (work) {
-    payload.response_topic = await_response(topic, id, work, broker_list);
+    payload.response_topic = await_response(topic, id, work);
     log(`Awaiting response on topic: ${payload.response_topic}`);
   }
 
