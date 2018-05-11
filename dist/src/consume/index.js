@@ -169,6 +169,7 @@ var consume = function consume(topic, work) {
   var stale_cache_timer = void 0;
 
   (0, _logger.log)('Consuming ' + topic + ' at offset ' + offset);
+  (0, _logger.log)('Kafkacat command: ' + _run.kafkacat + ' ' + consume_options);
   var consumer = spawn(_run.kafkacat, consume_options);
 
   consumer.stdout.on('data', function (data) {
