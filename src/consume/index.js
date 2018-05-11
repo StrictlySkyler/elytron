@@ -161,7 +161,7 @@ const consume = (topic, work, options = {
   let stdout = '';
   let stale_cache_timer;
 
-  log(`Consuming ${topic} at offset ${offset}`);
+  log(`Consuming ${topic} at offset ${offset}, using command: ${kafkacat}`);
   const consumer = spawn(kafkacat, consume_options);
 
   consumer.stdout.on('data', (data) => {
