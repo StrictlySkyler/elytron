@@ -9,16 +9,13 @@ decorate_producer(spawn);
 decorate_consumer(run, spawn);
 
 process.on('SIGINT', () => {
-  starve('*');
   process.exit();
 });
 process.on('SIGTERM', () => {
-  starve('*');
   process.exit();
 });
 process.on('exit', () => {
   starve('*');
-  process.exit();
 });
 
 export { produce, consume, starve };
