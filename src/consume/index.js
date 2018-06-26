@@ -1,4 +1,5 @@
 import uuid from 'uuid';
+import split from 'split';
 import { kafkacat, brokers } from '../../lib/run';
 import { log, error } from '../../lib/logger';
 import { BrokerError } from '../../lib/error';
@@ -8,7 +9,6 @@ let registered_consumers = {};
 let run;
 let spawn;
 
-const delimiter = ':msg:';
 const restart_consumer_interval = process.env
   .KAFKA_RESTART_CONSUMER_INTERVAL_MS ||
   1000
@@ -55,36 +55,14 @@ const consume_multi_topics = (topics, work, options) => {
 };
 
 const handle_consumer_data = (data, topic, id, work, exit) => {
-  let parsed = data.split(delimiter).reverse();
-  // Remove any empty string after the delimiter
-  if (parsed[0] === '') parsed.shift();
+  log(`Consumed data from ${topic}: ${data.payload}`);
+  let results = work(JSON.parse(data.payload));
 
-  let i = parsed.length;
-
-  while (i--) {
-    try { // Attempt to parse our most recent chunk
-      let deserialized = JSON.parse(parsed[i]);
-      let payload;
-
-      log(`Consumed data from ${topic}: ${deserialized.payload}`);
-      let results = work(deserialized.payload);
-
-      try { payload = JSON.parse(deserialized.payload); }
-      catch (e) { payload = deserialized.payload; }
-
-      if (payload.response_topic) produce(payload.response_topic, results);
-    }
-    catch (err) { // Incomplete chunk from string, save for next event
-      error(`Unable to parse data chunk: ${parsed[i]}`, err);
-      break;
-    }
-
-    parsed.splice(i, 1);
-  }
+  if (data.response_topic) produce(payload.response_topic, results);
 
   if (exit) teardown_consumer(topic, id);
 
-  return parsed.join('');
+  return results;
 };
 
 const handle_consumer_error = (err, topic, id) => {
@@ -154,33 +132,23 @@ const consume = (topic, work, options = {
   ;
   const id = uuid.v4();
   const consume_options = [
-    '-b', brokers, '-D', delimiter, '-o', offset, '-u', '-J',
+    '-b', brokers, '-o', offset, '-u', '-J',
     '-X', `topic.metadata.refresh.interval.ms=${refresh_interval}`,
   ].concat(consumer_type);
-
-  let stdout = '';
-  let stale_cache_timer;
 
   log(`Consuming ${topic} at offset ${offset}`);
   log(`Kafkacat command: ${kafkacat} ${consume_options.join(' ')}`);
   const consumer = spawn(kafkacat, consume_options);
 
-  consumer.stdout.on('data', (data) => {
-    clearTimeout(stale_cache_timer);
-    stdout += data.toString();
-    stdout = handle_consumer_data(stdout, topic, id, work, exit);
-    stale_cache_timer = setTimeout(
-      () => stdout = '',
-      process.env.ELYTRON_STALE_CACHE_TIMER || refresh_interval
-    );
-  });
-  consumer.stderr.on('data', (data) => {
-    handle_consumer_error(data.toString(), topic, id);
-  });
+  consumer.stdout
+    .pipe(split(JSON.parse))
+    .on('data', (data) => handle_consumer_data(data, topic, id, work, exit))
+    .on('error', (err) => { throw new BrokerError(err); });
+  consumer.stderr
+    .on('data', (data) => handle_consumer_error(data.toString(), topic, id));
 
-  consumer.on('close', (code) => {
-    handle_consumer_close(code, topic, work, options);
-  });
+  consumer
+    .on('close', (code) => handle_consumer_close(code, topic, work, options));
 
   return register_consumer(consumer, topic, id);
 };

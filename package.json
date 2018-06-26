@@ -1,6 +1,6 @@
 {
   "name": "elytron",
-  "version": "2.5.4",
+  "version": "2.5.5",
   "description": "An interface for Kafka in Node",
   "main": "./dist/src/index.js",
   "directories": {
@@ -47,6 +47,7 @@
   "dependencies": {
     "debug": "3.1.0",
     "mocha": "^5.0.1",
+    "split": "1.0.1",
     "uuid": "3.2.1"
   }
 }

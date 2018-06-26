@@ -9,6 +9,10 @@ var _uuid = require('uuid');
 
 var _uuid2 = _interopRequireDefault(_uuid);
 
+var _split = require('split');
+
+var _split2 = _interopRequireDefault(_split);
+
 var _run = require('../../lib/run');
 
 var _logger = require('../../lib/logger');
@@ -23,7 +27,6 @@ var registered_consumers = {};
 var run = void 0;
 var spawn = void 0;
 
-var delimiter = ':msg:';
 var restart_consumer_interval = process.env.KAFKA_RESTART_CONSUMER_INTERVAL_MS || 1000;
 
 var decorate_consumer = function decorate_consumer(Run, Spawn) {
@@ -66,40 +69,14 @@ var consume_multi_topics = function consume_multi_topics(topics, work, options) 
 };
 
 var handle_consumer_data = function handle_consumer_data(data, topic, id, work, exit) {
-  var parsed = data.split(delimiter).reverse();
-  // Remove any empty string after the delimiter
-  if (parsed[0] === '') parsed.shift();
+  (0, _logger.log)('Consumed data from ' + topic + ': ' + data.payload);
+  var results = work(JSON.parse(data.payload));
 
-  var i = parsed.length;
-
-  while (i--) {
-    try {
-      // Attempt to parse our most recent chunk
-      var deserialized = JSON.parse(parsed[i]);
-      var payload = void 0;
-
-      (0, _logger.log)('Consumed data from ' + topic + ': ' + deserialized.payload);
-      var results = work(deserialized.payload);
-
-      try {
-        payload = JSON.parse(deserialized.payload);
-      } catch (e) {
-        payload = deserialized.payload;
-      }
-
-      if (payload.response_topic) (0, _produce.produce)(payload.response_topic, results);
-    } catch (err) {
-      // Incomplete chunk from string, save for next event
-      (0, _logger.error)('Unable to parse data chunk: ' + parsed[i], err);
-      break;
-    }
-
-    parsed.splice(i, 1);
-  }
+  if (data.response_topic) (0, _produce.produce)(payload.response_topic, results);
 
   if (exit) teardown_consumer(topic, id);
 
-  return parsed.join('');
+  return results;
 };
 
 var handle_consumer_error = function handle_consumer_error(err, topic, id) {
@@ -163,29 +140,23 @@ var consume = function consume(topic, work) {
   var refresh_interval = process.env.KAFKA_TOPIC_METADATA_REFRESH_INTERVAL_MS || 60000;
   var consumer_type = group ? ['-G', group, topic instanceof Array ? topic.join(' ') : topic] : ['-C', '-t', topic];
   var id = _uuid2.default.v4();
-  var consume_options = ['-b', _run.brokers, '-D', delimiter, '-o', offset, '-u', '-J', '-X', 'topic.metadata.refresh.interval.ms=' + refresh_interval].concat(consumer_type);
-
-  var stdout = '';
-  var stale_cache_timer = void 0;
+  var consume_options = ['-b', _run.brokers, '-o', offset, '-u', '-J', '-X', 'topic.metadata.refresh.interval.ms=' + refresh_interval].concat(consumer_type);
 
   (0, _logger.log)('Consuming ' + topic + ' at offset ' + offset);
   (0, _logger.log)('Kafkacat command: ' + _run.kafkacat + ' ' + consume_options.join(' '));
   var consumer = spawn(_run.kafkacat, consume_options);
 
-  consumer.stdout.on('data', function (data) {
-    clearTimeout(stale_cache_timer);
-    stdout += data.toString();
-    stdout = handle_consumer_data(stdout, topic, id, work, exit);
-    stale_cache_timer = setTimeout(function () {
-      return stdout = '';
-    }, process.env.ELYTRON_STALE_CACHE_TIMER || refresh_interval);
+  consumer.stdout.pipe((0, _split2.default)(JSON.parse)).on('data', function (data) {
+    return handle_consumer_data(data, topic, id, work, exit);
+  }).on('error', function (err) {
+    throw new _error.BrokerError(err);
   });
   consumer.stderr.on('data', function (data) {
-    handle_consumer_error(data.toString(), topic, id);
+    return handle_consumer_error(data.toString(), topic, id);
   });
 
   consumer.on('close', function (code) {
-    handle_consumer_close(code, topic, work, options);
+    return handle_consumer_close(code, topic, work, options);
   });
 
   return register_consumer(consumer, topic, id);
