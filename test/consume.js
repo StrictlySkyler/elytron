@@ -7,9 +7,9 @@ let run = () => {
   return '';
 };
 let spawn = () => ({
-  on: () => {},
-  stdout: { on: () => {}, destroy: () => {} },
-  stderr: { on: () => {}, destroy: () => {} },
+  on: () => spawn(),
+  stdout: { pipe: () => spawn(), on: () => spawn(), destroy: () => spawn() },
+  stderr: { pipe: () => spawn(), on: () => spawn(), destroy: () => spawn() },
   kill: () => {},
 });
 const topic = 'news';
